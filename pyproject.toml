@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fake_https_server"
+version = "0.0.4"
+description = "Fake http and https servers"
+authors = [{ name = "Fabrício Barros Cabral", email = "fabriciofx@gmail.com" }]
+readme = "README.md"
+license = { file = "LICENSE" }
+keywords = ["fake", "mock", "http", "https", "server", "request"]
+dependencies = []
+
+[project.urls]
+"Homepage" = "https://github.com/fabriciofx/fake_https_server"
+"Bug Tracker" = "https://github.com/fabriciofx/fake_https_server/issues"
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[tool.setuptools]
+packages = ["fake_https_server"]

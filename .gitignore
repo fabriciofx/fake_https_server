@@ -1,0 +1,9 @@
+.idea/
+.venv/
+.vscode/
+__pycache__/
+build/
+dist/
+certificates/
+fake_https_server.egg-info/
+.DS_Store
