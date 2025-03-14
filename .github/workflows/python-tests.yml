@@ -41,6 +41,15 @@ jobs:
       - name: Install venv and requirements
         run: make install
 
+      # Recreate certificates
+      - name: Recreate certificates
+        run: |
+          mkdir certificates
+          echo "${{ secrets.SSL_SERVER_KEY }}" | base64 --decode > certificates/server.key
+          echo "${{ secrets.SSL_SERVER_CRT }}" | base64 --decode > certificates/server.crt
+          echo "${{ secrets.SSL_CA_KEY }}" | base64 --decode > certificates/ca.key
+        shell: bash
+
       # Run tests
       - name: Run tests
         run: make tests
