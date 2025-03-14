@@ -5,22 +5,19 @@
 Fake Https Server is a package to create auto assigned HTTPS and HTTP servers to
 use with tests. Useful to tests web scrapers and https or https clients.
 
-
 ## How create auto assigned certiticates
 
 Follow `docs/receita-servidor-cliente-ssl.md` recipe.
-
 
 ## How to use
 
 Install it using `pip` command:
 
 ```bash
-$ pip install fake_https_server
+pip install fake_https_server
 ```
 
 in your project folder.
-
 
 ## Usage
 

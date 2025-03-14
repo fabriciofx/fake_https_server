@@ -1,22 +1,19 @@
+# Passos para Criar um Servidor HTTPS com Certificado Autoassinado e CA Própria
 
----
+1. **Criar uma Autoridade Certificadora (CA)**
 
-## **📌 Passos para Criar um Servidor HTTPS com Certificado Autoassinado e CA Própria**
-1️⃣ **Criar uma Autoridade Certificadora (CA)**
+2. **Gerar um Certificado de Servidor e Assiná-lo com a CA**
 
-2️⃣ **Gerar um Certificado de Servidor e Assiná-lo com a CA**
+3. **Criar um Servidor HTTPS em Python 3.13**
 
-3️⃣ **Criar um Servidor HTTPS em Python 3.13**
+4. **Testar a Conexão com o Servidor**
 
-4️⃣ **Testar a Conexão com o Servidor**
+## Passo 1: Criar uma CA Própria
 
----
-
-## **🔹 Passo 1: Criar uma CA Própria**
 Antes de emitir certificados para o servidor, precisamos criar uma
 **CA (Autoridade Certificadora)**.
 
-### **1.1 Criar um arquivo de configuração `openssl.cnf`**
+### 1.1 Criar um arquivo de configuração `openssl.cnf`
 
 ```conf
 [ ca ]
@@ -62,24 +59,25 @@ basicConstraints = critical, CA:TRUE
 keyUsage = critical, keyCertSign, cRLSign
 ```
 
-### **1.2 Criar a chave privada da CA**
+### 1.2 Criar a chave privada da CA
 
 ```bash
 openssl genpkey -algorithm RSA -out ca.key -aes256
 ```
 
-🔹 Gera um arquivo **`ca.key`** protegido por senha.
+- Gera um arquivo **`ca.key`** protegido por senha.
 
-### **1.3 Criar um certificado para a CA**
+### 1.3 Criar um certificado para a CA
 
 ```bash
-openssl req -new -x509 -key ca.key -sha256 -days 3650 -out ca.crt -config openssl.cnf
+openssl req -new -x509 -key ca.key -sha256 -days 3650 -out ca.crt
+    -config openssl.cnf
 ```
 
-🔹 Esse comando gera um certificado autoassinado para a CA (**`ca.crt`**)
-válido por **10 anos (3650 dias)**.
+- Esse comando gera um certificado autoassinado para a CA (**`ca.crt`**)
+  válido por **10 anos (3650 dias)**.
 
-### **1.3 Verificar se a extensão `keyUsage` está presente**
+### 1.3 Verificar se a extensão `keyUsage` está presente
 
 ```bash
 openssl x509 -in ca.crt -text -noout | grep -A1 "Key Usage"
@@ -87,41 +85,44 @@ openssl x509 -in ca.crt -text -noout | grep -A1 "Key Usage"
 
 Se estiver correto, a saída incluirá:
 
-```
+```bash
 X509v3 Key Usage: critical
 Key Cert Sign, CRL Sign
 ```
 
 ---
 
-## **🔹 Passo 2: Criar um Certificado para o Servidor**
+## Passo 2: Criar um Certificado para o Servidor
+
 Agora, vamos gerar um certificado para o servidor e assiná-lo com a CA.
 
-### **2.1 Criar a chave privada do servidor**
+### 2.1 Criar a chave privada do servidor
 
 ```bash
 openssl genpkey -algorithm RSA -out server.key
 ```
 
-### **2.2 Criar um CSR (Certificate Signing Request) para o servidor**
+### 2.2 Criar um CSR (Certificate Signing Request) para o servidor
 
 ```bash
 openssl req -new -key server.key -out server.csr
 ```
-🔹 Durante esse processo, o OpenSSL pedirá informações como o
+
+- Durante esse processo, o OpenSSL pedirá informações como o
 **Common Name (CN)**.
-🔹 O **CN** deve ser o nome do host que você usará para acessar o servidor
+- O **CN** deve ser o nome do host que você usará para acessar o servidor
 (exemplo: `localhost`).
 
-### **2.3 Assinar o CSR com a CA**
+### 2.3 Assinar o CSR com a CA
 
 ```bash
-openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 3650 -sha256
+openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial
+    -out server.crt -days 3650 -sha256
 ```
 
-🔹 Isso gera o certificado assinado pela CA: **`server.crt`**.
+- Isso gera o certificado assinado pela CA: **`server.crt`**.
 
-### **2.4 Verificar se o Certificado do Servidor foi Assinado pelo CA**
+### 2.4 Verificar se o Certificado do Servidor foi Assinado pelo CA
 
 Verifique a assinatura do certificado do servidor com o seguinte comando:
 
@@ -134,10 +135,11 @@ assine com a CA.
 
 ---
 
-## **🔹 Passo 3: Criar um Servidor HTTPS em Python 3.13**
+## Passo 3: Criar um Servidor HTTPS em Python 3.13
+
 Agora que temos os certificados, podemos criar um **servidor HTTPS**.
 
-### **📝 Código do Servidor HTTPS**
+### Código do Servidor HTTPS
 
 ```python
 import http.server
@@ -164,27 +166,30 @@ print("Servidor HTTPS rodando em https://localhost:4443")
 httpd.serve_forever()
 ```
 
-🔹 Esse código cria um **servidor HTTPS** escutando na porta **`4443`**.
-🔹 Ele utiliza os arquivos **`server.key`** (chave privada) e **`server.crt`**
-(certificado assinado pela CA).
-🔹 O servidor usa `SimpleHTTPRequestHandler` para servir arquivos do diretório
-atual.
+- Esse código cria um **servidor HTTPS** escutando na porta **`4443`**.
+- Ele utiliza os arquivos **`server.key`** (chave privada) e **`server.crt`**
+  (certificado assinado pela CA).
+- O servidor usa `SimpleHTTPRequestHandler` para servir arquivos do diretório
+  atual.
 
 ---
 
-## **🔹 Passo 4: Testar a Conexão**
-### **🔹 Testar no Navegador**
+## Passo 4: Testar a Conexão
+
+### Testar no Navegador
+
 Abra no navegador:
 
-```
+```bash
 https://localhost:4443
 ```
 
-⚠️ **Se o navegador mostrar um aviso de "Conexão não segura"**, isso acontece
+- **Se o navegador mostrar um aviso de "Conexão não segura"**, isso acontece
 porque a CA não é reconhecida. Você pode adicionar o arquivo **`ca.crt`** ao
 sistema para resolver isso.
 
-### **🔹 Testar com `curl`**
+### Testar com `curl`
+
 Para ignorar a verificação SSL:
 
 ```bash
@@ -197,7 +202,8 @@ Ou, para validar a CA:
 curl --cacert ca.crt https://localhost:4443
 ```
 
-### **🔹 Testar com `requests` no Python**
+### Testar com `requests` no Python
+
 Crie um cliente Python para se conectar ao servidor:
 
 ```python
@@ -213,7 +219,8 @@ Se quiser ignorar a verificação SSL (para testes apenas):
 response = requests.get("https://localhost:4443", verify=False)
 ```
 
-### **🔹 Testar com `http.client` no Python**
+### Testar com `http.client` no Python
+
 Crie um cliente Python para se conectar ao servidor:
 
 ```python
@@ -237,17 +244,16 @@ print("Resposta:", response.read().decode())
 conn.close()
 ```
 
----
+## Resumo
 
-## **📌 Resumo**
-1️⃣ **Criamos uma CA própria** (`ca.key`, `ca.crt`).
+1. **Criamos uma CA própria** (`ca.key`, `ca.crt`).
 
-2️⃣ **Geramos um certificado de servidor assinado pela CA**
+2. **Geramos um certificado de servidor assinado pela CA**
 (`server.key`, `server.crt`).
 
-3️⃣ **Criamos um servidor HTTPS em Python 3.13**.
+3. **Criamos um servidor HTTPS em Python 3.13**.
 
-4️⃣ **Testamos a conexão usando navegador, `curl` e `requests`**.
+4. **Testamos a conexão usando navegador, `curl` e `requests`**.
 
 Agora você tem um **servidor HTTPS seguro com certificado autoassinado e uma
-CA própria**! 🚀🔥
+CA própria**!
