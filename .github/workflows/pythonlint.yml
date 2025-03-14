@@ -41,6 +41,10 @@ jobs:
       - name: Install venv and requirements
         run: make install
 
+      # Install linter
+      - name: Install ruff
+        run: pip install ruff
+
       # Run lint
       - name: Run lint
         run: make lint
