@@ -24,7 +24,7 @@ PYTHON=python
 PIP=pip
 RUFF=ruff
 PYTEST=pytest
-ACTIVATE=source .venv/bin/activate
+ACTIVATE=. .venv/bin/activate
 
 .PHONY: install tests lint format
 
