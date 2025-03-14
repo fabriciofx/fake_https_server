@@ -13,7 +13,8 @@
 ---
 
 ## **🔹 Passo 1: Criar uma CA Própria**
-Antes de emitir certificados para o servidor, precisamos criar uma **CA (Autoridade Certificadora)**.
+Antes de emitir certificados para o servidor, precisamos criar uma
+**CA (Autoridade Certificadora)**.
 
 ### **1.1 Criar um arquivo de configuração `openssl.cnf`**
 
@@ -62,16 +63,21 @@ keyUsage = critical, keyCertSign, cRLSign
 ```
 
 ### **1.2 Criar a chave privada da CA**
+
 ```bash
 openssl genpkey -algorithm RSA -out ca.key -aes256
 ```
+
 🔹 Gera um arquivo **`ca.key`** protegido por senha.
 
 ### **1.3 Criar um certificado para a CA**
+
 ```bash
 openssl req -new -x509 -key ca.key -sha256 -days 3650 -out ca.crt -config openssl.cnf
 ```
-🔹 Esse comando gera um certificado autoassinado para a CA (**`ca.crt`**) válido por **10 anos (3650 dias)**.
+
+🔹 Esse comando gera um certificado autoassinado para a CA (**`ca.crt`**)
+válido por **10 anos (3650 dias)**.
 
 ### **1.3 Verificar se a extensão `keyUsage` está presente**
 
@@ -92,21 +98,27 @@ Key Cert Sign, CRL Sign
 Agora, vamos gerar um certificado para o servidor e assiná-lo com a CA.
 
 ### **2.1 Criar a chave privada do servidor**
+
 ```bash
 openssl genpkey -algorithm RSA -out server.key
 ```
 
 ### **2.2 Criar um CSR (Certificate Signing Request) para o servidor**
+
 ```bash
 openssl req -new -key server.key -out server.csr
 ```
-🔹 Durante esse processo, o OpenSSL pedirá informações como o **Common Name (CN)**.
-🔹 O **CN** deve ser o nome do host que você usará para acessar o servidor (exemplo: `localhost`).
+🔹 Durante esse processo, o OpenSSL pedirá informações como o
+**Common Name (CN)**.
+🔹 O **CN** deve ser o nome do host que você usará para acessar o servidor
+(exemplo: `localhost`).
 
 ### **2.3 Assinar o CSR com a CA**
+
 ```bash
 openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 3650 -sha256
 ```
+
 🔹 Isso gera o certificado assinado pela CA: **`server.crt`**.
 
 ### **2.4 Verificar se o Certificado do Servidor foi Assinado pelo CA**
@@ -116,7 +128,9 @@ Verifique a assinatura do certificado do servidor com o seguinte comando:
 ```bash
 openssl verify -CAfile ca.crt server.crt
 ```
-Se o comando não retornar **"OK"**, gere um novo certificado para o servidor e assine com a CA.
+
+Se o comando não retornar **"OK"**, gere um novo certificado para o servidor e
+assine com a CA.
 
 ---
 
@@ -124,13 +138,15 @@ Se o comando não retornar **"OK"**, gere um novo certificado para o servidor e 
 Agora que temos os certificados, podemos criar um **servidor HTTPS**.
 
 ### **📝 Código do Servidor HTTPS**
+
 ```python
 import http.server
 import ssl
 
-# Configuração do servidor
-server_address = ('0.0.0.0', 4443)  # Porta HTTPS
-handler = http.server.SimpleHTTPRequestHandler  # Manipulador padrão para servir arquivos
+# Configuração do servidor, porta 4443
+server_address = ('0.0.0.0', 4443)
+ # Manipulador padrão para servir arquivos
+handler = http.server.SimpleHTTPRequestHandler
 
 # Criar o servidor HTTP
 httpd = http.server.HTTPServer(server_address, handler)
@@ -138,7 +154,8 @@ httpd = http.server.HTTPServer(server_address, handler)
 # Criar contexto SSL com os certificados gerados
 context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 context.load_cert_chain(certfile="server.crt", keyfile="server.key")
-context.load_verify_locations("ca.crt")  # Opcional, se quiser validar clientes
+# Opcional, se quiser validar clientes
+context.load_verify_locations("ca.crt")
 
 # Associar o contexto SSL ao socket do servidor
 httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
@@ -148,25 +165,34 @@ httpd.serve_forever()
 ```
 
 🔹 Esse código cria um **servidor HTTPS** escutando na porta **`4443`**.
-🔹 Ele utiliza os arquivos **`server.key`** (chave privada) e **`server.crt`** (certificado assinado pela CA).
-🔹 O servidor usa `SimpleHTTPRequestHandler` para servir arquivos do diretório atual.
+🔹 Ele utiliza os arquivos **`server.key`** (chave privada) e **`server.crt`**
+(certificado assinado pela CA).
+🔹 O servidor usa `SimpleHTTPRequestHandler` para servir arquivos do diretório
+atual.
 
 ---
 
 ## **🔹 Passo 4: Testar a Conexão**
 ### **🔹 Testar no Navegador**
 Abra no navegador:
+
 ```
 https://localhost:4443
 ```
-⚠️ **Se o navegador mostrar um aviso de "Conexão não segura"**, isso acontece porque a CA não é reconhecida. Você pode adicionar o arquivo **`ca.crt`** ao sistema para resolver isso.
+
+⚠️ **Se o navegador mostrar um aviso de "Conexão não segura"**, isso acontece
+porque a CA não é reconhecida. Você pode adicionar o arquivo **`ca.crt`** ao
+sistema para resolver isso.
 
 ### **🔹 Testar com `curl`**
 Para ignorar a verificação SSL:
+
 ```bash
 curl -k https://localhost:4443
 ```
+
 Ou, para validar a CA:
+
 ```bash
 curl --cacert ca.crt https://localhost:4443
 ```
@@ -182,6 +208,7 @@ print(response.text)
 ```
 
 Se quiser ignorar a verificação SSL (para testes apenas):
+
 ```python
 response = requests.get("https://localhost:4443", verify=False)
 ```
@@ -215,12 +242,12 @@ conn.close()
 ## **📌 Resumo**
 1️⃣ **Criamos uma CA própria** (`ca.key`, `ca.crt`).
 
-2️⃣ **Geramos um certificado de servidor assinado pela CA** (`server.key`, `server.crt`).
+2️⃣ **Geramos um certificado de servidor assinado pela CA**
+(`server.key`, `server.crt`).
 
 3️⃣ **Criamos um servidor HTTPS em Python 3.13**.
 
 4️⃣ **Testamos a conexão usando navegador, `curl` e `requests`**.
 
-Agora você tem um **servidor HTTPS seguro com certificado autoassinado e uma CA própria**! 🚀🔥
-
-Se precisar de mais ajuda, me avise! 😊
+Agora você tem um **servidor HTTPS seguro com certificado autoassinado e uma
+CA própria**! 🚀🔥
