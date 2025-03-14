@@ -21,11 +21,10 @@
 # SOFTWARE.
 import http.client
 import ssl
-
 from pathlib import Path
 
 from fake_https_server.request import ContentGet
-from fake_https_server.server import FakeHttpServer, FakeHttpsServer, Daemon
+from fake_https_server.server import Daemon, FakeHttpServer, FakeHttpsServer
 
 
 def test_fake_http_server() -> None:
