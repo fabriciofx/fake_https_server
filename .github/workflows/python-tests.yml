@@ -43,12 +43,13 @@ jobs:
 
       # Recreate certificates
       - name: Recreate certificates
-        # yamllint disable-line rule:line-length
+        # yamllint disable rule:line-length
         run: |
           mkdir certificates
           echo "${{ secrets.SSL_SERVER_KEY }}" | base64 --decode > certificates/server.key
           echo "${{ secrets.SSL_SERVER_CRT }}" | base64 --decode > certificates/server.crt
           echo "${{ secrets.SSL_CA_CRT }}" | base64 --decode > certificates/ca.crt
+        # yamllint enable rule:line-length
         shell: bash
 
       # Run tests
