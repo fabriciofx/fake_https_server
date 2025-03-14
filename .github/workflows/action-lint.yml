@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ---
-name: pythonlint
+name: action-lint
 'on':
   push:
     branches:
@@ -29,22 +29,15 @@ name: pythonlint
     branches:
       - main
 jobs:
-  pythonlint:
-    name: pythonlint
+  action-lint:
     runs-on: ubuntu-24.04
     steps:
-      # Checkout repository
-      - name: Checkout Git repository
-        uses: actions/checkout@v4
-
-      # Install venv and requirements
-      - name: Install venv and requirements
-        run: make install
-
-      # Install linter
-      - name: Install ruff
-        run: pip install ruff
-
-      # Run lint
-      - name: Run lint
-        run: make lint
+      - uses: actions/checkout@v4
+      - name: Download actionlint
+        id: get_actionlint
+        # yamllint disable-line rule:line-length
+        run: bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+        shell: bash
+      - name: Check workflow files
+        run: ${{ steps.get_actionlint.outputs.executable }} -color
+        shell: bash
