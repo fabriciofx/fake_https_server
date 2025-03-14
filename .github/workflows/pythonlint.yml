@@ -37,7 +37,10 @@ jobs:
       - name: Checkout Git repository
         uses: actions/checkout@v4
 
+      # Install venv and requirements
+      - name: Install venv and requirements
+        uses: make install
+
       # Run lint
       - name: Run lint
         run: make lint
-        shell: bash
