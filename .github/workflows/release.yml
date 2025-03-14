@@ -41,9 +41,13 @@ jobs:
         with:
           python-version: '3.13'
 
+      # Install build package
+      - name: Install build tool
+        run: pip install build
+
       # Build package
       - name: Build package
-        run: pip install build && python -m build
+        run: python -m build
 
       # Publishes to PyPI
       - name: Make release

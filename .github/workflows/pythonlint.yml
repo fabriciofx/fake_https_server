@@ -36,4 +36,7 @@ jobs:
       # Checkout repository
       - name: Checkout Git repository
         uses: actions/checkout@v4
+
+      # Run lint
+      - name: Run lint
         run: make lint
