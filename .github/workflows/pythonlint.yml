@@ -29,17 +29,11 @@ name: pythonlint
     branches:
       - main
 jobs:
-  latexlint:
+  pythonlint:
     name: pythonlint
     runs-on: ubuntu-24.04
     steps:
       # Checkout repository
       - name: Checkout Git repository
         uses: actions/checkout@v4
-
-      # Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9'
-          run: make lint
+        run: make lint
