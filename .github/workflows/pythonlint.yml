@@ -39,7 +39,7 @@ jobs:
 
       # Install venv and requirements
       - name: Install venv and requirements
-        uses: make install
+        run: make install
 
       # Run lint
       - name: Run lint
