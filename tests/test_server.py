@@ -31,7 +31,7 @@ def test_fake_http_server() -> None:
     msg = "It works"
     server = Daemon(FakeHttpServer(ContentGet(msg)))
     server.start()
-    client = http.client.HTTPConnection("localhost", 8080)
+    client = http.client.HTTPConnection("localhost", server.port())
     client.request("GET", "/")
     response = client.getresponse()
     content = response.read().decode()
@@ -45,7 +45,9 @@ def test_fake_https_server() -> None:
     server = Daemon(FakeHttpsServer(ContentGet(msg)))
     server.start()
     client = http.client.HTTPSConnection(
-        "localhost", 8443, context=ssl.create_default_context(cafile=ca_file)
+        "localhost",
+        server.port(),
+        context=ssl.create_default_context(cafile=ca_file),
     )
     client.request("GET", "/")
     response = client.getresponse()

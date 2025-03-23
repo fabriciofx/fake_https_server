@@ -27,6 +27,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from typing import Any
 
+from random_port.core import TcpRandomPort
+
 from fake_https_server.request import Request
 
 
@@ -40,7 +42,11 @@ class Server(ABC):
         pass
 
     @abstractmethod
-    def details(self) -> dict[str, Any]:
+    def host(self) -> str:
+        pass
+
+    @abstractmethod
+    def port(self) -> int:
         pass
 
     @abstractmethod
@@ -64,17 +70,20 @@ class HandlerWrapper(BaseHTTPRequestHandler):
 
 class FakeHttpServer(Server):
     def __init__(
-        self, request: Request, host: str = "localhost", port: int = 8080
+        self,
+        request: Request,
+        host: str = "localhost",
+        port: TcpRandomPort | int = TcpRandomPort(),
     ) -> None:
         self.__host = host
-        self.__port = port
+        self.__port = port.value()
 
         def __handler_wrapper(
             *args: tuple[Any, ...], **kwargs: dict[str, Any]
         ) -> BaseHTTPRequestHandler:
             return HandlerWrapper(request, *args, **kwargs)
 
-        self.__httpd = HTTPServer((host, port), __handler_wrapper)
+        self.__httpd = HTTPServer((self.__host, self.__port), __handler_wrapper)
 
     def start(self) -> None:
         try:
@@ -86,8 +95,11 @@ class FakeHttpServer(Server):
         self.__httpd.shutdown()
         self.__httpd.server_close()
 
-    def details(self) -> dict[str, Any]:
-        return {"host": self.__host, "port": self.__port}
+    def host(self) -> str:
+        return self.__host
+
+    def port(self) -> int:
+        return self.__port
 
     def protocol(self) -> str:
         return "http"
@@ -98,14 +110,14 @@ class FakeHttpsServer(Server):
         self,
         request: Request,
         host: str = "localhost",
-        port: int = 8443,
+        port: TcpRandomPort | int = TcpRandomPort(),
         *,
         cert_file: Path | str = "certificates/server.crt",
         key_file: Path | str = "certificates/server.key",
         ca_file: Path | str = "certificates/ca.crt",
     ) -> None:
         self.__host = host
-        self.__port = port
+        self.__port = port.value()
 
         def __handler_wrapper(
             *args: tuple[Any, ...], **kwargs: dict[str, Any]
@@ -115,7 +127,9 @@ class FakeHttpsServer(Server):
         cert_file = str(Path(cert_file).resolve())
         key_file = str(Path(key_file).resolve())
         ca_file = str(Path(ca_file).resolve())
-        self.__httpsd = HTTPServer((host, port), __handler_wrapper)
+        self.__httpsd = HTTPServer(
+            (self.__host, self.__port), __handler_wrapper
+        )
         sslctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         sslctx.load_cert_chain(certfile=cert_file, keyfile=key_file)
         sslctx.load_verify_locations(ca_file)
@@ -133,8 +147,11 @@ class FakeHttpsServer(Server):
         self.__httpsd.shutdown()
         self.__httpsd.server_close()
 
-    def details(self) -> dict[str, Any]:
-        return {"host": self.__host, "port": self.__port}
+    def host(self) -> str:
+        return self.__host
+
+    def port(self) -> int:
+        return self.__port
 
     def protocol(self) -> str:
         return "https"
@@ -145,10 +162,11 @@ class Logged(Server):
         self.__origin = server
 
     def start(self) -> None:
-        details = self.__origin.details()
+        host = self.__origin.host()
+        port = self.__origin.port()
         print(
             f"Starting {self.protocol().upper()} server at "
-            f"https://{details['host']}:{details['port']}... ",
+            f"https://{host}:{port}... ",
             end="",
             flush=True,
             file=sys.stderr,
@@ -166,8 +184,11 @@ class Logged(Server):
         self.__origin.stop()
         print("done.", flush=True, file=sys.stderr)
 
-    def details(self) -> dict[str, Any]:
-        return self.__origin.details()
+    def host(self) -> str:
+        return self.__origin.host()
+
+    def port(self) -> int:
+        return self.__origin.port()
 
     def protocol(self) -> str:
         return self.__origin.protocol()
@@ -186,8 +207,11 @@ class Daemon(Server):
         self.__origin.stop()
         self.__thread.join()
 
-    def details(self) -> dict[str, Any]:
-        return self.__origin.details()
+    def host(self) -> str:
+        return self.__origin.host()
+
+    def port(self) -> int:
+        return self.__origin.port()
 
     def protocol(self) -> str:
         return self.__origin.protocol()

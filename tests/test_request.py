@@ -33,7 +33,9 @@ def test_file_content_get() -> None:
     server = Daemon(FakeHttpsServer(FileContentGet(content_file)))
     server.start()
     client = http.client.HTTPSConnection(
-        "localhost", 8443, context=ssl.create_default_context(cafile=ca_file)
+        "localhost",
+        server.port(),
+        context=ssl.create_default_context(cafile=ca_file),
     )
     client.request("GET", "/")
     response = client.getresponse()
@@ -49,7 +51,9 @@ def test_large_file() -> None:
     server = Daemon(FakeHttpsServer(FileContentGet(content_file)))
     server.start()
     client = http.client.HTTPSConnection(
-        "localhost", 8443, context=ssl.create_default_context(cafile=ca_file)
+        "localhost",
+        server.port(),
+        context=ssl.create_default_context(cafile=ca_file),
     )
     client.request("GET", "/")
     response = client.getresponse()
@@ -64,11 +68,11 @@ def test_fail() -> None:
     server = Daemon(FakeHttpServer(Fail(ContentGet(msg), retries)))
     server.start()
     try:
-        client = http.client.HTTPConnection("localhost", 8080)
+        client = http.client.HTTPConnection("localhost", server.port())
         client.request("GET", "/")
         response = client.getresponse()
     except Exception:
-        client = http.client.HTTPConnection("localhost", 8080)
+        client = http.client.HTTPConnection("localhost", server.port())
         client.request("GET", "/")
         response = client.getresponse()
     assert response.read().decode() == msg
