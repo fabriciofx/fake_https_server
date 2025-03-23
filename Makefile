@@ -26,7 +26,7 @@ RUFF=ruff
 PYTEST=pytest
 ACTIVATE=. .venv/bin/activate
 
-.PHONY: install tests lint format
+.PHONY: install tests lint format clean
 
 install:
 	$(PYTHON) -m venv .venv
@@ -40,3 +40,10 @@ lint:
 
 format:
 	$(ACTIVATE) && $(RUFF) format .
+
+clean:
+	rm -rf .venv dist *.egg-info
+	find . -type d -name "*.pyc" -exec rm -r {} +
+	find . -type d -name "__pycache__" -exec rm -r {} +
+	find . -type d -name ".ruff_cache" -exec rm -r {} +
+	find . -type d -name ".pytest_cache" -exec rm -r {} +
