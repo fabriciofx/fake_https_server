@@ -27,7 +27,7 @@ permissions: write-all
     tags:
       - '*'
 jobs:
-  build:
+  build-and-release:
     name: build-and-release
     runs-on: ubuntu-24.04
     steps:
