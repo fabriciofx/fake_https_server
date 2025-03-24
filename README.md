@@ -30,12 +30,12 @@ Then, you can use HTTP or HTTPS server as follow:
 # Message to be sent
 msg = "It works"
 # Create the fake HTTP server. By default the HTTP server will listen at
-# localhost, port 8080
+# localhost, a random free port (between 1024 and 65535)
 server = Daemon(FakeHttpServer(ContentGet(msg)))
 # Start the server
 server.start()
-# Make a http client connection to the server.
-client = http.client.HTTPConnection("localhost", 8080)
+# Make a http client connection to the server
+client = http.client.HTTPConnection("localhost", server.port())
 client.request("GET", "/")
 # Get the server response
 response = client.getresponse()
@@ -52,14 +52,14 @@ ca_file = Path(__file__).parent.parent / "certificates" / "ca.crt"
 # Message to be sent
 msg = "It works!"
 # Create the fake HTTPS server. By default the HTTPS server will listen at
-# localhost, port 8443
+# localhost, a random free port (between 1024 and 65535)
 server = Daemon(FakeHttpsServer(ContentGet(msg)))
 # Start the server
 server.start()
 # Make a https client connection to the server
 client = http.client.HTTPSConnection(
     "localhost",
-    8443,
+    server.port(),
     context=ssl.create_default_context(cafile=ca_file)
 )
 client.request("GET", "/")

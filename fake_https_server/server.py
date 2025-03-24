@@ -27,7 +27,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from typing import Any
 
-from random_port.core import TcpRandomPort
+from random_port.pool import TcpRandomPort
 
 from fake_https_server.request import Request
 
