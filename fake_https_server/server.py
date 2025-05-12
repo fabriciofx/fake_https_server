@@ -176,7 +176,7 @@ class Logged(Server):
 
     def stop(self) -> None:
         print(
-            f"Stoping {self.protocol().upper()} server... ",
+            f"Stopping {self.protocol().upper()} server... ",
             end="",
             flush=True,
             file=sys.stderr,

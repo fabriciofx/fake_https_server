@@ -5,7 +5,7 @@
 Fake Https Server is a package to create auto assigned HTTPS and HTTP servers to
 use with tests. Useful to tests web scrapers and https or https clients.
 
-## How create auto assigned certiticates
+## How create auto assigned certificates
 
 Follow `docs/receita-servidor-cliente-ssl.md` recipe.
 
