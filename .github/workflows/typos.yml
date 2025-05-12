@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ---
-name: python-tests
+name: typos
 'on':
   push:
     branches:
@@ -29,31 +29,11 @@ name: python-tests
     branches:
       - main
 jobs:
-  python-tests:
-    name: python-tests
+  typos:
+    timeout-minutes: 15
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Install venv and requirements
-        # yamllint disable rule:line-length
-        run: |
-          if [ -f Makefile ]; then
-            make install
-          else
-            python -m venv .venv && . ./.venv/bin/activate && pip install -r requirements.txt
-          fi
-        # yamllint enable rule:line-length
-      - name: Recreate certificates
-        # yamllint disable rule:line-length
-        run: |
-          if [ -n "${{ secrets.SSL_SERVER_KEY }}" ]; then
-            mkdir certificates
-            echo "${{ secrets.SSL_SERVER_KEY }}" | base64 --decode > certificates/server.key
-            echo "${{ secrets.SSL_SERVER_CRT }}" | base64 --decode > certificates/server.crt
-            echo "${{ secrets.SSL_CA_CRT }}" | base64 --decode > certificates/ca.crt
-          fi
-        # yamllint enable rule:line-length
-        shell: bash
-      - name: Run tests
-        run: . ./.venv/bin/activate && pytest
+      - name: Check files for typos
+        uses: crate-ci/typos@v1.32.0
