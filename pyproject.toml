@@ -21,3 +21,8 @@ dev = ["pytest", "ruff"]
 
 [tool.setuptools]
 packages = ["fake_https_server"]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--numprocesses=auto",
+]
